@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Paint.FontMetrics;
 import android.graphics.Paint.Style;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -45,17 +46,17 @@ public class PuzzleView extends View{
     @Override
     protected void onDraw(Canvas canvas) {
         Paint background = new Paint();
-        background.setColor(getResources().getColor(R.color.puzzle_background));
+        background.setColor(ContextCompat.getColor(getContext(), R.color.puzzle_background));
         canvas.drawRect(0, 0, getWidth(), getHeight(), background);
 
         Paint dark = new Paint();
-        dark.setColor(getResources().getColor(R.color.puzzle_dark));
+        dark.setColor(ContextCompat.getColor(getContext(), R.color.puzzle_dark));
 
         Paint hilite = new Paint();
-        hilite.setColor(getResources().getColor(R.color.puzzle_hilite));
+        hilite.setColor(ContextCompat.getColor(getContext(), R.color.puzzle_hilite));
 
         Paint light = new Paint();
-        light.setColor(getResources().getColor(R.color.puzzle_light));
+        light.setColor(ContextCompat.getColor(getContext(), R.color.puzzle_light));
 
         for (int i = 0; i < 9; i++) {
             canvas.drawLine(0, i * height, getWidth(), i * height, light);
@@ -73,7 +74,7 @@ public class PuzzleView extends View{
         }
 
         Paint foreground = new Paint(Paint.ANTI_ALIAS_FLAG);
-        foreground.setColor(getResources().getColor(R.color.puzzle_foreground));
+        foreground.setColor(ContextCompat.getColor(getContext(), R.color.puzzle_foreground));
         foreground.setStyle(Style.FILL);
         foreground.setTextSize(height * 0.75f);
         foreground.setTextScaleX(width / height);
@@ -91,40 +92,35 @@ public class PuzzleView extends View{
 
         Log.d(TAG, "selRect=" + selRect);
         Paint selected = new Paint();
-        selected.setColor(getResources().getColor(R.color.puzzle_selected));
+        selected.setColor(ContextCompat.getColor(getContext(), R.color.puzzle_selected));
         canvas.drawRect(selRect, selected);
 
         Paint mistake = new Paint();
-        int mistake_color = getResources().getColor(R.color.mistake_background);
+        int mistake_color = ContextCompat.getColor(getContext(), R.color.mistake_background);
         Rect r = new Rect();
-        for (int i = 0; i < 9; i++) {
-            for (int j = 0; j < 9; j++) {
-                int value = game.getTile(i, j);
-                int candY = checkRow(i, j, value);
-                int candX = checkColumn(i, j, value);
-                Log.d(TAG, "candX = " + candX);
-                Log.d(TAG, "candY = " + candY);
-                if (candX != -1 || candY != -1) {
-                    getRect(i, j, r);
-                    mistake.setColor(mistake_color);
-                    canvas.drawRect(r, mistake);
-                    canvas.drawText(this.game.getTileString(i, j), i * width + x, j * height + y, foreground);
-                    if (candX != -1) {
-                        Rect rx = new Rect();
-                        getRect(candX, j, rx);
-                        canvas.drawRect(rx, mistake);
-                        canvas.drawText(this.game.getTileString(candX, j), candX * width + x, j * height + y, foreground);
-                    }
-                    if (candY != -1) {
-                        Rect ry = new Rect();
-                        getRect(i, candY, ry);
-                        canvas.drawRect(ry, mistake);
-                        canvas.drawText(this.game.getTileString(i, candY), i * width + x, candY * height + y, foreground);
-                    }
-                }
+        int value = game.getTile(selX, selY);
+        int candY = checkRow(selX, selY, value);
+        int candX = checkColumn(selX, selY, value);
+        Log.d(TAG, "candX = " + candX);
+        Log.d(TAG, "candY = " + candY);
+        if (candX != -1 || candY != -1) {
+            getRect(selX, selY, r);
+            mistake.setColor(mistake_color);
+            canvas.drawRect(r, mistake);
+            canvas.drawText(this.game.getTileString(selX, selY), selX * width + x, selY * height + y, foreground);
+            if (candX != -1) {
+                Rect rx = new Rect();
+                getRect(candX, selY, rx);
+                canvas.drawRect(rx, mistake);
+                canvas.drawText(this.game.getTileString(candX, selY), candX * width + x, selY * height + y, foreground);
+            }
+            if (candY != -1) {
+                Rect ry = new Rect();
+                getRect(selX, candY, ry);
+                canvas.drawRect(ry, mistake);
+                canvas.drawText(this.game.getTileString(selX, candY), selX * width + x, candY * height + y, foreground);
             }
         }
-
 
         super.onDraw(canvas);
     }
