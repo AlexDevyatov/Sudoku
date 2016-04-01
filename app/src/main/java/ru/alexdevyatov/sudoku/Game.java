@@ -58,12 +58,13 @@ public class Game extends AppCompatActivity {
     }
 
     public boolean setTileIfValid(int x, int y, int value) {
+        setTile(x, y, value);
         int tiles[] = getUsedTiles(x, y); if (value != 0) {
             for (int tile : tiles) { if (tile == value) return false;
             }
         }
-        setTile(x, y, value);
-        calculateUsedTiles(); return true;
+        calculateUsedTiles();
+        return true;
     }
 
     private void calculateUsedTiles() {
@@ -154,11 +155,8 @@ public class Game extends AppCompatActivity {
         return buf.toString();
     }
 
-    private int getTile(int x, int y) {
-        Log.d(TAG, "x" + x + "y" + y);
-        //if (y * 9 + x < puzzle.length)
-            return puzzle[y * 9 + x];
-        //return 0;
+    public int getTile(int x, int y) {
+        return puzzle[y * 9 + x];
     }
 
     private void setTile(int x, int y, int value) {

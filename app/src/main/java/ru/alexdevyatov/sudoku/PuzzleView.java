@@ -94,24 +94,65 @@ public class PuzzleView extends View{
         selected.setColor(getResources().getColor(R.color.puzzle_selected));
         canvas.drawRect(selRect, selected);
 
-        /*Paint hint = new Paint();
-        int c[] = {
-                getResources().getColor(R.color.puzzle_hint_0),
-                getResources().getColor(R.color.puzzle_hint_1),
-                getResources().getColor(R.color.puzzle_hint_2)
-        };
+        Paint mistake = new Paint();
+        int mistake_color = getResources().getColor(R.color.mistake_background);
         Rect r = new Rect();
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
-                int movesleft = 9 - game.getUsedTiles(i, j).length;
-                if (movesleft < c.length) {
+                int value = game.getTile(i, j);
+                int candY = checkRow(i, j, value);
+                int candX = checkColumn(i, j, value);
+                Log.d(TAG, "candX = " + candX);
+                Log.d(TAG, "candY = " + candY);
+                if (candX != -1 || candY != -1) {
                     getRect(i, j, r);
-                    hint.setColor(c[movesleft]);
-                    canvas.drawRect(r, hint);
+                    mistake.setColor(mistake_color);
+                    canvas.drawRect(r, mistake);
+                    canvas.drawText(this.game.getTileString(i, j), i * width + x, j * height + y, foreground);
+                    if (candX != -1) {
+                        Rect rx = new Rect();
+                        getRect(candX, j, rx);
+                        canvas.drawRect(rx, mistake);
+                        canvas.drawText(this.game.getTileString(candX, j), candX * width + x, j * height + y, foreground);
+                    }
+                    if (candY != -1) {
+                        Rect ry = new Rect();
+                        getRect(i, candY, ry);
+                        canvas.drawRect(ry, mistake);
+                        canvas.drawText(this.game.getTileString(i, candY), i * width + x, candY * height + y, foreground);
+                    }
                 }
             }
-        }*/
+        }
+
+
         super.onDraw(canvas);
+    }
+
+    private int checkRow (int x, int y, int value) { // Возвращает координату y ячейки, значение которой совпадает с value
+        for (int j = 0; j < 9; j++) {
+            if (j == y)
+                continue;
+            int cellValue = game.getTile(x, j);
+            if (cellValue == 0)
+                continue;
+            if (cellValue == value)
+                return j;
+        }
+        return -1;
+    }
+
+    private int checkColumn (int x, int y, int value) { // Возвращает координату x ячейки, значение которой совпадает с value
+        for (int i = 0; i < 9; i++) {
+            if (i == x)
+                continue;
+            int cellValue = game.getTile(i, y);
+            if (cellValue == 0)
+                continue;
+            if (cellValue == value)
+                return i;
+        }
+        return -1;
     }
 
     @Override
@@ -134,11 +175,8 @@ public class PuzzleView extends View{
     }
 
     public void setSelectedTile(int tile) {
-        if (game.setTileIfValid(selX, selY, tile))
-            invalidate();
-        else {
-            Log.d(TAG, "setSelectedTile: invalid:" + tile);
+        invalidate();
+        if (!game.setTileIfValid(selX, selY, tile))
             startAnimation(AnimationUtils.loadAnimation(game, R.anim.shake));
-        }
     }
 }
