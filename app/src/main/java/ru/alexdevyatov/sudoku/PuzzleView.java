@@ -51,12 +51,15 @@ public class PuzzleView extends View{
         canvas.drawRect(0, 0, getWidth(), getHeight(), background);
 
         Paint dark = new Paint();
+        dark.setStrokeWidth(10);
         dark.setColor(ContextCompat.getColor(getContext(), R.color.puzzle_dark));
 
         Paint hilite = new Paint();
+        hilite.setStrokeWidth(5);
         hilite.setColor(ContextCompat.getColor(getContext(), R.color.puzzle_hilite));
 
         Paint light = new Paint();
+        light.setStrokeWidth(5);
         light.setColor(ContextCompat.getColor(getContext(), R.color.puzzle_light));
 
         for (int i = 0; i < 9; i++) {

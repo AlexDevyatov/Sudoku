@@ -6,9 +6,9 @@
     <color name="background">#32C850</color>
     <color name="text_color">#ffffff</color>
     <color name="puzzle_background">#ffe6f0ff</color>
-    <color name="puzzle_hilite">#ffffffff</color>
+    <color name="puzzle_hilite">#0a161a</color>
     <color name="puzzle_light">#64c6d4ef</color>
-    <color name="puzzle_dark">#6456648f</color>
+    <color name="puzzle_dark">#0a161a</color>
     <color name="puzzle_foreground">#ff000000</color>
     <color name="mistake_background">#C92222</color>
 
