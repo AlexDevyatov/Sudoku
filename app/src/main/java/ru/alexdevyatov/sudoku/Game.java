@@ -36,89 +36,25 @@ public class Game extends AppCompatActivity {
         Log.d(TAG, "onCreate");
         int diff = getIntent().getIntExtra(KEY_DIFFICULTY, DIFFICULTY_EASY);
         puzzle = getPuzzle(diff);
-        calculateUsedTiles();
         puzzleView = new PuzzleView(this);
         setContentView(puzzleView);
         puzzleView.requestFocus();
     }
 
-    public void showKeyPadOrError(int x, int y) {
-        int tiles[] = getUsedTiles(x, y);
-        if (tiles.length == 9) {
-            Toast toast = Toast.makeText(this,
-                    R.string.no_moves_label, Toast.LENGTH_SHORT); toast.setGravity(Gravity.CENTER, 0, 0); toast.show();
-        } else {
-            Log.d(TAG, "showKeypad: used=" + toPuzzleString(tiles));
-
-            int new_tiles[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-
-            Dialog v = new Keypad(this, new_tiles, puzzleView);
-            v.show();
-        }
+    public void showKeyPad(int x, int y) {
+        int tiles[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+        Log.d(TAG, "showKeypad: used=" + toPuzzleString(tiles));
+        Dialog v = new Keypad(this, tiles, puzzleView);
+        v.show();
     }
 
-    public boolean setTileIfValid(int x, int y, int value) {
+    public boolean setTileIfValid(int x, int y, int value) throws Exception {
         setTile(x, y, value);
-        int tiles[] = getUsedTiles(x, y); if (value != 0) {
-            for (int tile : tiles) { if (tile == value) return false;
-            }
-        }
-        calculateUsedTiles();
-        return true;
+        return !puzzleView.tryToFindCoincidences(x, y, value);
     }
 
-    private void calculateUsedTiles() {
-        for (int x = 0; x < 9; x++) {
-            for (int y = 0; y < 9; y++) {
-                used[x][y] = calculateUsedTiles(x, y);
-            }
-        }
-    }
-
-    private int[] calculateUsedTiles(int x, int y) {
-        int c[] = new int[9];
-        for (int i = 0; i < 9; i++) {
-            if (i == x)
-                continue;
-            int t = getTile(i, y);
-            if (t != 0)
-                c[t-1] = t;
-        }
-        for (int i = 0; i < 9; i++) {
-            if (i == x)
-                continue;
-            int t = getTile(x, i);
-            if (t != 0)
-                c[t-1] = t;
-        }
-        int startx = (x / 3) * 3;
-        int starty = (y / 3) * 3;
-        for (int i = startx; i < startx + 3; i++) {
-            for (int j = starty; j < starty + 3; j++) {
-                if (i == x && j == y)
-                    continue;
-                int t = getTile(i, j);
-                if (t != 0)
-                    c[t - 1] = t;
-            }
-        }
-        int nused = 0;
-        for (int t: c) {
-            if (t != 0)
-                nused++;
-        }
-        int c1[] = new int[nused];
-        nused = 0;
-        for (int t: c) {
-            if (t != 0)
-                c1[nused++] = t;
-        }
-        return c1;
-    }
-
-
-    protected int[] getUsedTiles(int x, int y) {
-        return used[x][y];
+    public void clearTile(int x, int y) {
+        setTile(x, y, 0);
     }
 
     private int[] getPuzzle(int diff) {

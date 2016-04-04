@@ -37,19 +37,27 @@ public class Keypad extends Dialog {
 
                 @Override
                 public void onClick(View v) {
-                    returnResult(t);
+                    try {
+                        returnResult(t);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             });
         }
         keypad.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                returnResult(0);
+                try {
+                    returnResult(0);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
 
-    private void returnResult(int tile) {
+    private void returnResult(int tile) throws Exception {
         puzzleView.setSelectedTile(tile);
         dismiss();
     }

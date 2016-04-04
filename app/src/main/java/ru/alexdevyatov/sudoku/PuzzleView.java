@@ -3,6 +3,7 @@ package ru.alexdevyatov.sudoku;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Paint.FontMetrics;
 import android.graphics.Paint.Style;
@@ -99,33 +100,84 @@ public class PuzzleView extends View{
         int mistake_color = ContextCompat.getColor(getContext(), R.color.mistake_background);
         Rect r = new Rect();
         int value = game.getTile(selX, selY);
-        int candY = checkRow(selX, selY, value);
-        int candX = checkColumn(selX, selY, value);
-        Log.d(TAG, "candX = " + candX);
-        Log.d(TAG, "candY = " + candY);
-        if (candX != -1 || candY != -1) {
-            getRect(selX, selY, r);
-            mistake.setColor(mistake_color);
-            canvas.drawRect(r, mistake);
-            canvas.drawText(this.game.getTileString(selX, selY), selX * width + x, selY * height + y, foreground);
-            if (candX != -1) {
-                Rect rx = new Rect();
-                getRect(candX, selY, rx);
-                canvas.drawRect(rx, mistake);
-                canvas.drawText(this.game.getTileString(candX, selY), candX * width + x, selY * height + y, foreground);
+        try {
+            if (tryToFindCoincidences(selX, selY, value)) {
+                getRect(selX, selY, r);
+                mistake.setColor(mistake_color);
+                canvas.drawRect(r, mistake);
+                game.clearTile(selX, selY);
             }
-            if (candY != -1) {
-                Rect ry = new Rect();
-                getRect(selX, candY, ry);
-                canvas.drawRect(ry, mistake);
-                canvas.drawText(this.game.getTileString(selX, candY), selX * width + x, candY * height + y, foreground);
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         super.onDraw(canvas);
     }
 
-    private int checkRow (int x, int y, int value) { // Возвращает координату y ячейки, значение которой совпадает с value
+    private int getNumberOfSector (int x, int y) {
+        if (x >= 0 && y >= 0 && x <= 2 && y <= 2)
+            return 0;
+        if (x >= 3 && y >= 0 && x <= 5 && y <= 2)
+            return 1;
+        if (x >= 6 && y >= 0 && x <= 8 && y <= 2)
+            return 2;
+        if (x >= 0 && y >= 3 && x <= 2 && y <= 5)
+            return 3;
+        if (x >= 3 && y >= 3 && x <= 5 && y <= 5)
+            return 4;
+        if (x >= 6 && y >= 3 && x <= 8 && y <= 5)
+            return 5;
+        if (x >= 0 && y >= 6 && x <= 2 && y <= 8)
+            return 6;
+        if (x >= 3 && y >= 6 && x <= 5 && y <= 8)
+            return 7;
+        if (x >= 6 && y >= 6 && x <= 8 && y <= 8)
+            return 8;
+        return -1;
+    }
+
+    private Point getStartPoint (int x, int y) throws Exception {
+        int sector = getNumberOfSector(x, y);
+        switch (sector) {
+            case 0:
+                return new Point(0, 0);
+            case 1:
+                return new Point(3, 0);
+            case 2:
+                return new Point(6, 0);
+            case 3:
+                return new Point(0, 3);
+            case 4:
+                return new Point(3, 3);
+            case 5:
+                return new Point(6, 3);
+            case 6:
+                return new Point(0, 6);
+            case 7:
+                return new Point(3, 6);
+            case 8:
+                return new Point(6, 6);
+        }
+        Log.d("getStartPoint", "x = " + x + "y = " + y);
+        throw new Exception("Fail to get a start point");
+    }
+
+    private boolean checkSector (int x, int y, int value) throws Exception {
+        Point startPoint = getStartPoint(x, y);
+        for (int i = startPoint.x; i < startPoint.x + 3; i++)
+            for (int j = startPoint.y; j < startPoint.y + 3; j++) {
+                if (i == x && j == y)
+                    continue;
+                int cellValue = game.getTile(i, j);
+                if (cellValue == 0)
+                    continue;
+                if (cellValue == value)
+                    return true;
+            }
+        return false;
+    }
+
+    private boolean checkRow (int x, int y, int value) {
         for (int j = 0; j < 9; j++) {
             if (j == y)
                 continue;
@@ -133,12 +185,12 @@ public class PuzzleView extends View{
             if (cellValue == 0)
                 continue;
             if (cellValue == value)
-                return j;
+                return true;
         }
-        return -1;
+        return false;
     }
 
-    private int checkColumn (int x, int y, int value) { // Возвращает координату x ячейки, значение которой совпадает с value
+    private boolean checkColumn (int x, int y, int value) {
         for (int i = 0; i < 9; i++) {
             if (i == x)
                 continue;
@@ -146,9 +198,13 @@ public class PuzzleView extends View{
             if (cellValue == 0)
                 continue;
             if (cellValue == value)
-                return i;
+                return true;
         }
-        return -1;
+        return false;
+    }
+
+    public boolean tryToFindCoincidences (int x, int y, int value) throws Exception {
+        return checkColumn(x, y, value) || checkRow(x, y, value) || checkSector(x, y, value);
     }
 
     @Override
@@ -157,7 +213,7 @@ public class PuzzleView extends View{
             return super.onTouchEvent(event);
         select((int) (event.getX() / width),
                 (int) (event.getY() / height));
-        game.showKeyPadOrError(selX, selY);
+        game.showKeyPad(selX, selY);
         Log.d(TAG, "onTouchEvent: x " + selX + ", y " + selY);
         return true;
     }
@@ -170,7 +226,7 @@ public class PuzzleView extends View{
         invalidate(selRect);
     }
 
-    public void setSelectedTile(int tile) {
+    public void setSelectedTile(int tile) throws Exception {
         invalidate();
         if (!game.setTileIfValid(selX, selY, tile))
             startAnimation(AnimationUtils.loadAnimation(game, R.anim.shake));
