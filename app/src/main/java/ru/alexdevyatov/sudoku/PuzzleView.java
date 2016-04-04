@@ -34,7 +34,8 @@ public class PuzzleView extends View{
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         width = w / 9f;
-        height = h / 9f;
+        //height = h / 9f;
+        height = width;
         getRect(selX, selY, selRect);
         Log.d(TAG, "onSizeChanged: width " + width + ", height " + height);
         super.onSizeChanged(w, h, oldw, oldh);
@@ -58,23 +59,18 @@ public class PuzzleView extends View{
         hilite.setStrokeWidth(5);
         hilite.setColor(ContextCompat.getColor(getContext(), R.color.puzzle_hilite));
 
-        Paint light = new Paint();
-        light.setStrokeWidth(5);
-        light.setColor(ContextCompat.getColor(getContext(), R.color.puzzle_light));
 
         for (int i = 0; i < 9; i++) {
-            canvas.drawLine(0, i * height, getWidth(), i * height, light);
-            canvas.drawLine(0, i * height + 1, getWidth(), i * height + 1, hilite);
-            canvas.drawLine(i * width, 0, i * width, getHeight(), light);
-            canvas.drawLine(i * width + 1, 0, i * width + 1, getHeight(), hilite);
+            canvas.drawLine(0, i * height, getWidth(), i * height, hilite); //горизонтали
+            canvas.drawLine(i * width, 0, i * width, 9 * height, hilite); //вертикали
         }
+        canvas.drawLine(0, 9 * height, getWidth(), 9 * height, hilite);
 
         for (int i = 0; i < 9; i++) {
             if (i % 3 != 0)
                 continue;
             canvas.drawLine(0, i * height, getWidth(), i * height, dark);
-            canvas.drawLine(0, i * height + 1, getWidth(), i * height + 1, hilite);
-            canvas.drawLine(i * width, 0, i * width, getHeight(), dark); canvas.drawLine(i * width + 1, 0, i * width + 1, getHeight(), hilite);
+            canvas.drawLine(i * width, 0, i * width, 9 * height, dark);
         }
 
         Paint foreground = new Paint(Paint.ANTI_ALIAS_FLAG);
