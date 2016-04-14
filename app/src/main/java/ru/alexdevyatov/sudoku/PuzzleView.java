@@ -34,7 +34,6 @@ public class PuzzleView extends View{
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         width = w / 9f;
-        //height = h / 9f;
         height = width;
         getRect(selX, selY, selRect);
         Log.d(TAG, "onSizeChanged: width " + width + ", height " + height);
@@ -204,6 +203,11 @@ public class PuzzleView extends View{
 
     public boolean tryToFindCoincidences (int x, int y, int value) throws Exception {
         return checkColumn(x, y, value) || checkRow(x, y, value) || checkSector(x, y, value);
+    }
+
+    public boolean isWin() {
+
+        return true;
     }
 
     @Override
