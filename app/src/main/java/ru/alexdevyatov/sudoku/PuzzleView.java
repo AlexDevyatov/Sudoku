@@ -9,10 +9,10 @@ import android.graphics.Paint.FontMetrics;
 import android.graphics.Paint.Style;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
+import android.widget.Toast;
 
 public class PuzzleView extends View{
     private static final String TAG = "Sudoku";
@@ -49,6 +49,20 @@ public class PuzzleView extends View{
         Paint background = new Paint();
         background.setColor(ContextCompat.getColor(getContext(), R.color.puzzle_background));
         canvas.drawRect(0, 0, getWidth(), getHeight(), background);
+
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                if (game.isStartValue(i, j)) {
+                    Paint start = new Paint();
+                    int start_value_color = ContextCompat.getColor(getContext(), R.color.puzzle_start_value);
+                    Rect r = new Rect();
+                    getRect(i, j, r);
+                    start.setColor(start_value_color);
+                    canvas.drawRect(r, start);
+                }
+            }
+        }
+
 
         Paint dark = new Paint();
         dark.setStrokeWidth(10);
@@ -93,6 +107,8 @@ public class PuzzleView extends View{
         Paint selected = new Paint();
         selected.setColor(ContextCompat.getColor(getContext(), R.color.puzzle_selected));
         canvas.drawRect(selRect, selected);
+
+
 
         Paint mistake = new Paint();
         int mistake_color = ContextCompat.getColor(getContext(), R.color.mistake_background);
@@ -160,6 +176,20 @@ public class PuzzleView extends View{
         throw new Exception("Fail to get a start point");
     }
 
+    public Point[] getStartPoints() {
+        return new Point[] {
+                new Point(0, 0),
+                new Point(3, 0),
+                new Point(6, 0),
+                new Point(0, 3),
+                new Point(3, 3),
+                new Point(6, 3),
+                new Point(0, 6),
+                new Point(3, 6),
+                new Point(6, 6)
+        };
+    }
+
     private boolean checkSector (int x, int y, int value) throws Exception {
         Point startPoint = getStartPoint(x, y);
         for (int i = startPoint.x; i < startPoint.x + 3; i++)
@@ -205,18 +235,14 @@ public class PuzzleView extends View{
         return checkColumn(x, y, value) || checkRow(x, y, value) || checkSector(x, y, value);
     }
 
-    public boolean isWin() {
-
-        return true;
-    }
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() != MotionEvent.ACTION_DOWN)
             return super.onTouchEvent(event);
         select((int) (event.getX() / width),
                 (int) (event.getY() / height));
-        game.showKeyPad(selX, selY);
+        if (!game.isStartValue(selX, selY))
+            game.showKeyPad(selX, selY);
         Log.d(TAG, "onTouchEvent: x " + selX + ", y " + selY);
         return true;
     }

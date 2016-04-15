@@ -1,11 +1,14 @@
 package ru.alexdevyatov.sudoku;
 
 import android.app.Dialog;
+import android.graphics.Point;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
+
+import java.util.HashSet;
 
 public class Game extends AppCompatActivity {
     private static final String TAG = "Sudoku";
@@ -14,6 +17,7 @@ public class Game extends AppCompatActivity {
     public static final int DIFFICULTY_MEDIUM = 1;
     public static final int DIFFICULTY_HARD = 2;
     private int puzzle[];
+    private boolean startvalues[];
     private PuzzleView puzzleView;
     private final int used[][][] = new int[9][9][];
 
@@ -36,6 +40,7 @@ public class Game extends AppCompatActivity {
         Log.d(TAG, "onCreate");
         int diff = getIntent().getIntExtra(KEY_DIFFICULTY, DIFFICULTY_EASY);
         puzzle = getPuzzle(diff);
+        startvalues = getStartValue(puzzle);
         puzzleView = new PuzzleView(this);
         setContentView(puzzleView);
         puzzleView.requestFocus();
@@ -91,20 +96,78 @@ public class Game extends AppCompatActivity {
         return buf.toString();
     }
 
+    private boolean[] getStartValue(int[] puzzle) {
+        boolean[] val = new boolean[puzzle.length];
+        for (int i = 0; i < puzzle.length; i++) {
+            if (puzzle[i] == 0)
+                val[i] = false;
+            else
+                val[i] = true;
+        }
+        return val;
+    }
+
     public int getTile(int x, int y) {
         return puzzle[y * 9 + x];
     }
 
+    public boolean isStartValue (int x, int y) {
+        return startvalues[y * 9 + x];
+    }
+
     private void setTile(int x, int y, int value) {
-        if (y * 9 + x < puzzle.length)
+        if (y * 9 + x < puzzle.length && !isStartValue(x, y))
             puzzle[y * 9 + x] = value;
     }
 
     protected String getTileString(int x, int y) {
-        int v = getTile(x, y);
-        if (v == 0)
+        int value = getTile(x, y);
+        if (value == 0)
             return "" ;
         else
-            return String.valueOf(v);
+            return String.valueOf(value);
+    }
+
+    public boolean isWin() {
+        HashSet<Integer> check = new HashSet<Integer>();
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                int value = getTile(i, j);
+                if (value == 0)
+                    return false;
+                check.add(value);
+            }
+        }
+        if (check.size() != 9)
+            return false;
+
+        check.clear();
+        for (int j = 0; j < 9; j++) {
+            for (int i = 0; i < 9; i++) {
+                int value = getTile(i, j);
+                if (value == 0)
+                    return false;
+                check.add(value);
+            }
+        }
+        if (check.size() != 9)
+            return false;
+
+        Point[] startPoints = puzzleView.getStartPoints();
+        for (Point point: startPoints) {
+            check.clear();
+            for (int i = point.x; i < point.x + 3; i++) {
+                for (int j = point.y; j < point.y + 3; j++) {
+                    int value = getTile(i, j);
+                    if (value == 0)
+                        return false;
+                    check.add(value);
+                }
+            }
+            if (check.size() != 9)
+                return false;
+        }
+
+        return true;
     }
 }

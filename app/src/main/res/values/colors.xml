@@ -5,6 +5,7 @@
     <color name="colorAccent">#FF4081</color>
     <color name="background">#32C850</color>
     <color name="text_color">#ffffff</color>
+    <color name="puzzle_start_value">#DFEBC6</color>
     <color name="puzzle_background">#ffe6f0ff</color>
     <color name="puzzle_hilite">#0a161a</color>
     <color name="puzzle_dark">#0a161a</color>
